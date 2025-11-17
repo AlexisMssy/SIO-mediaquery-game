@@ -4,52 +4,82 @@
 const box = document.getElementById("box");
 
 const levels = [
-    { text: "Niveau 1 : Quand l'écran fait moins de 600px → Le carré doit devenir bleu.",
-      validate: () => getComputedStyle(box).backgroundColor === "rgb(0, 0, 255)" },
+    {
+        text: "Niveau 1 : Quand l'écran fait moins de 600px → Le carré doit devenir bleu.",
+        validate: () => getComputedStyle(box).backgroundColor === "rgb(0, 0, 255)"
+    },
 
-    { text: "Niveau 2 : Quand l'écran fait plus de 800px → Le carré doit mesurer 300px.",
-      validate: () => box.offsetWidth === 300 },
+    {
+        text: "Niveau 2 : Quand l'écran fait plus de 800px → Le carré doit mesurer 300px.",
+        validate: () => box.offsetWidth === 300
+    },
 
-    { text: "Niveau 3 : Entre 500px et 900px → Le carré doit devenir un cercle.",
-      validate: () => getComputedStyle(box).borderRadius === "50%" },
+    {
+        text: "Niveau 3 : Entre 500px et 900px → Le carré doit devenir un cercle.",
+        validate: () => getComputedStyle(box).borderRadius === "50%"
+    },
 
-    { text: "Niveau 4 : Quand l'écran fait moins de 400px → Le carré doit disparaître.",
-      validate: () => getComputedStyle(box).display === "none" },
+    {
+        text: "Niveau 4 : Quand l'écran fait moins de 400px → Le carré doit disparaître.",
+        validate: () => getComputedStyle(box).display === "none"
+    },
 
-    { text: "Niveau 5 : Quand l'écran fait plus de 1000px → carré vert + largeur 400px.",
-      validate: () =>
-        getComputedStyle(box).backgroundColor === "rgb(0, 128, 0)" &&
-        box.offsetWidth === 400 },
+    {
+        text: "Niveau 5 : Quand l'écran fait plus de 1000px → carré vert + largeur 400px.",
+        validate: () =>
+            getComputedStyle(box).backgroundColor === "rgb(0, 128, 0)" &&
+            box.offsetWidth === 400
+    },
 
-    { text: "Niveau 6 : Moins de 700px → carré = 100px.",
-      validate: () => box.offsetWidth === 100 },
+    {
+        text: "Niveau 6 : Moins de 700px → carré = 100px.",
+        validate: () => box.offsetWidth === 100
+    },
 
-    { text: "Niveau 7 : Entre 600px et 900px → carré jaune.",
-      validate: () => getComputedStyle(box).backgroundColor === "rgb(255, 255, 0)" },
+    {
+        text: "Niveau 7 : Entre 600px et 900px → carré jaune.",
+        validate: () => getComputedStyle(box).backgroundColor === "rgb(255, 255, 0)"
+    },
 
-    { text: "Niveau 8 : Plus de 900px → bordure noire 5px.",
-      validate: () => getComputedStyle(box).borderWidth === "5px" },
+    {
+        text: "Niveau 8 : Plus de 900px → bordure noire 5px.",
+        validate: () => getComputedStyle(box).borderWidth === "5px"
+    },
 
-    { text: "Niveau 9 : Moins de 500px → opacité 50%.",
-      validate: () => getComputedStyle(box).opacity === "0.5" },
+    {
+        text: "Niveau 9 : Moins de 500px → opacité 50%.",
+        validate: () => getComputedStyle(box).opacity === "0.5"
+    },
 
-    { text: "Niveau 10 : Plus de 1100px → rotation 45°.",
-      validate: () => getComputedStyle(box).transform.includes("45deg") },
+    {
+        text: "Niveau 10 : Plus de 1100px → rotation 45°.",
+        validate: () => getComputedStyle(box).transform.includes("45deg")
+    },
 
-    { text: "Niveau 11 : Moins de 550px → rectangle (300x120).",
-      validate: () => box.offsetWidth === 300 && box.offsetHeight === 120 },
+    {
+        text: "Niveau 11 : Moins de 550px → rectangle (300x120).",
+        validate: () => box.offsetWidth === 300 && box.offsetHeight === 120
+    },
 
-    { text: "Niveau 12 : Entre 700px et 1200px → carré blanc.",
-      validate: () => getComputedStyle(box).backgroundColor === "rgb(255, 255, 255)" },
+    {
+        text: "Niveau 12 : Entre 700px et 1200px → carré blanc.",
+        validate: () => getComputedStyle(box).backgroundColor === "rgb(255, 255, 255)"
+    },
 
-    { text: "Niveau 13 : Plus de 1300px → margin-top 50px.",
-      validate: () => box.style.marginTop === "50px" },
+    {
+        text: "Niveau 13 : Plus de 1300px → margin-top 50px.",
+        validate: () => box.style.marginTop === "50px"
+    },
 
-    { text: "Niveau 14 : Moins de 500px → ombre portée.",
-      validate: () => getComputedStyle(box).boxShadow !== "none" },
+    {
+        text: "Niveau 14 : Moins de 500px → ombre portée.",
+        validate: () => getComputedStyle(box).boxShadow !== "none"
+    },
 
-    { text: "Niveau 15 : Plus de 1000px → ovale.",
-      validate: () => getComputedStyle(box).borderRadius.includes("50px") }
+    {
+        text: "Niveau 15 : Plus de 1000px → ovale.",
+        validate: () => getComputedStyle(box).borderRadius.includes("50px")
+    }
 ];
 
 // ---------------------
@@ -76,17 +106,21 @@ document.getElementById("test-btn").onclick = () => {
     css.innerHTML = codeInput.value;
     document.body.appendChild(css);
 
-    setTimeout(() => {
-        if (levels[currentLevel].validate()) {
-            score++;
-            statusDiv.innerHTML = "Réussi";
-            statusDiv.style.color = "green";
-            nextBtn.style.display = "block";
-        } else {
-            statusDiv.innerHTML = "Incorrect";
-            statusDiv.style.color = "red";
-        }
-    }, 150);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+
+            if (levels[currentLevel].validate()) {
+                score++;
+                statusDiv.textContent = "Réussi";
+                statusDiv.style.color = "green";
+                nextBtn.style.display = "block";
+            } else {
+                statusDiv.textContent = "Incorrect";
+                statusDiv.style.color = "red";
+            }
+
+        });
+    });
 };
 
 // ---------------------
