@@ -154,6 +154,7 @@ function endGame() {
         `Temps total : ${totalTime} sec`;
 
     saveScore(score, totalTime);
+    updateScoreboard();
 
     gameEnd.style.display = "block";
     codeInput.style.display = "none";
@@ -168,20 +169,28 @@ function saveScore(score, time) {
     const name = prompt("Ton nom pour le classement ?") || "Anonyme";
 
     const entry = { name, score, time };
-    const list = JSON.parse(localStorage.getItem("mq_scores") || "[]");
+
+    let list = [];
+
+    try {
+        list = JSON.parse(localStorage.getItem("mq_scores")) || [];
+    } catch {
+        list = []; // si JSON cassé
+    }
 
     list.push(entry);
     localStorage.setItem("mq_scores", JSON.stringify(list));
-
-    updateScoreboard();
 }
 
+// Mise à jour visuelle
 function updateScoreboard() {
-    const list = JSON.parse(localStorage.getItem("mq_scores") || "[]");
+    let list = JSON.parse(localStorage.getItem("mq_scores") || "[]");
+
+    list.sort((a, b) => b.score - a.score || a.time - b.time);
+
     const tbody = document.getElementById("scoreboard-body");
 
     tbody.innerHTML = "";
-    list.sort((a, b) => b.score - a.score || a.time - b.time);
 
     list.forEach(row => {
         tbody.innerHTML += `
