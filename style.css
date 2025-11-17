@@ -65,6 +65,31 @@ textarea {
     transform: translateY(-1px);
 }
 
+/* Toast / notification flottante */
+.toast {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    min-width: 200px;
+    max-width: 320px;
+    padding: 10px 14px;
+    color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.toast--success { background: #4CAF50; }
+.toast--error { background: #e74c3c; }
+.toast--info { background: #4a4ad4; }
+
 #preview {
     border: 2px dashed #999;
     background: #fafafa;

@@ -221,13 +221,29 @@ document.getElementById("restart-btn").onclick = () => location.reload();
 // ---------------------
 // RECHARGER CSS EXTERNE
 // ---------------------
+// simple toast notification helper
+function showToast(message, type = 'info', duration = 3000) {
+    const t = document.createElement('div');
+    t.className = `toast toast--${type}`;
+    t.textContent = message;
+    document.body.appendChild(t);
+
+    // force reflow then show
+    requestAnimationFrame(() => t.classList.add('show'));
+
+    setTimeout(() => {
+        t.classList.remove('show');
+        // remove after transition
+        setTimeout(() => t.remove(), 220);
+    }, duration);
+}
+
 const reloadCssBtn = document.getElementById('reload-css-btn');
 if (reloadCssBtn) {
-    reloadCssBtn.onclick = async () => {
+    // maintenant, le bouton recharge le CSS contenu dans le textarea `code-input`
+    reloadCssBtn.onclick = () => {
         try {
-            const res = await fetch('style.css');
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const text = await res.text();
+            const text = codeInput.value;
 
             let css = document.getElementById('mq-user-style');
             if (!css) {
@@ -240,13 +256,11 @@ if (reloadCssBtn) {
             // force reflow et attendre deux frames (comme pour le test)
             void box.offsetWidth;
             requestAnimationFrame(() => requestAnimationFrame(() => {
-                statusDiv.textContent = 'CSS rechargé depuis style.css';
-                statusDiv.style.color = 'blue';
+                showToast('CSS appliqué depuis la zone de code', 'success');
             }));
 
         } catch (err) {
-            statusDiv.textContent = 'Erreur: impossible de charger correction.css — active Live Server ou lance un serveur local';
-            statusDiv.style.color = 'red';
+            showToast('Erreur : impossible d\'appliquer le CSS', 'error');
             console.error(err);
         }
     };
