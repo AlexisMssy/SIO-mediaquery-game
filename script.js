@@ -155,6 +155,7 @@ const statusDiv = document.getElementById("status");
 const nextBtn = document.getElementById("next-level");
 const gameEnd = document.getElementById("game-end");
 const levelCounter = document.getElementById('level-counter');
+const levelList = document.getElementById('level-list');
 
 levelText.textContent = levels[currentLevel].text;
 // afficher le compteur initial
@@ -162,6 +163,43 @@ function updateLevelCounter() {
     if (!levelCounter) return;
     levelCounter.textContent = `Niveau ${currentLevel + 1} / ${levels.length}`;
     levelCounter.style.display = '';
+    updateLevelList();
+}
+
+// Liste des niveaux réussis (sauvegardée avec la progression)
+function getDoneLevels() {
+    let done = [];
+    try {
+        done = JSON.parse(localStorage.getItem('mq_done_levels')) || [];
+    } catch {}
+    return done;
+}
+function setDoneLevels(done) {
+    localStorage.setItem('mq_done_levels', JSON.stringify(done));
+}
+
+function updateLevelList() {
+    if (!levelList) return;
+    const doneLevels = getDoneLevels();
+    levelList.innerHTML = '';
+    levels.forEach((lvl, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'level-btn';
+        btn.textContent = `Niveau ${i + 1}`;
+        if (doneLevels.includes(i)) btn.classList.add('done');
+        if (i === currentLevel) btn.classList.add('selected');
+        btn.onclick = () => {
+            currentLevel = i;
+            levelText.textContent = levels[currentLevel].text;
+            codeInput.value = '';
+            statusDiv.innerHTML = '';
+            nextBtn.style.display = 'none';
+            updateLevelCounter();
+            saveProgress();
+        };
+        levelList.appendChild(btn);
+    });
 }
 
 updateLevelCounter();
@@ -191,9 +229,16 @@ document.getElementById("test-btn").onclick = () => {
 
             if (effectOk && expectedCheck.ok) {
                 score++;
+                // marquer le niveau comme fait
+                const doneLevels = getDoneLevels();
+                if (!doneLevels.includes(currentLevel)) {
+                    doneLevels.push(currentLevel);
+                    setDoneLevels(doneLevels);
+                }
                 statusDiv.textContent = "Réussi";
                 statusDiv.style.color = "green";
                 nextBtn.style.display = "block";
+                updateLevelList();
             } else if (effectOk && !expectedCheck.ok) {
                 // effet présent mais media query manquante
                 const missingText = expectedCheck.missing.join(', ');

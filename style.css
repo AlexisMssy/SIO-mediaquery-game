@@ -34,6 +34,33 @@ header {
     color: #555;
     margin-bottom: 12px;
 }
+
+.level-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.level-list .level-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    background: #f8f8f8;
+    color: #333;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+}
+.level-list .level-btn.done {
+    background: #4CAF50;
+    color: #fff;
+    border-color: #388e3c;
+}
+.level-list .level-btn.selected {
+    background: #4a4ad4;
+    color: #fff;
+    border-color: #2222aa;
+}
 /* (editor overlay removed) */
 
 
