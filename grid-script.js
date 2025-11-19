@@ -1,0 +1,153 @@
+// Grid-based game — 30 niveaux
+const grid = document.getElementById('grid');
+
+// helper to get cards and sidebar
+function cards() { return Array.from(grid.querySelectorAll('.card')); }
+function sidebar() { return grid.querySelector('.sidebar'); }
+
+const levels = [
+    { text: 'Niveau 1 : < 480px → 1 colonne.', validate: () => getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length === 1, expected: ['max-width: 480px'] },
+    { text: 'Niveau 2 : ≥ 481px → 2 colonnes.', validate: () => getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length === 2, expected: ['min-width: 481px'] },
+    { text: 'Niveau 3 : ≥ 768px → 3 colonnes.', validate: () => getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length === 3, expected: ['min-width: 768px'] },
+    { text: 'Niveau 4 : ≥ 1024px → 4 colonnes.', validate: () => getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length === 4, expected: ['min-width: 1024px'] },
+    { text: 'Niveau 5 : ≥ 900px → gap = 24px.', validate: () => getComputedStyle(grid).columnGap.includes('24px'), expected: ['min-width: 900px'] },
+    { text: 'Niveau 6 : < 600px → cacher la sidebar.', validate: () => getComputedStyle(sidebar()).display === 'none', expected: ['max-width: 600px'] },
+    { text: 'Niveau 7 : ≥ 1200px → sidebar = 280px.', validate: () => getComputedStyle(grid).gridTemplateColumns.split(' ')[0].includes('280px'), expected: ['min-width: 1200px'] },
+    { text: 'Niveau 8 : ≥ 1400px → utiliser grid-template-areas (presence).', validate: () => getComputedStyle(grid).gridTemplateAreas && getComputedStyle(grid).gridTemplateAreas !== 'none', expected: ['min-width: 1400px'] },
+    { text: 'Niveau 9 : 600–900px → items centrés (justify-items:center).', validate: () => getComputedStyle(grid).justifyItems === 'center', expected: ['min-width: 600px', 'max-width: 900px'] },
+    {
+        text: 'Niveau 10 : ≥ 1100px → premier élément span 2 colonnes.', validate: () => {
+            const c = cards(); if (!c.length) return false; const rects = c.map(el => el.getBoundingClientRect()); const avg = rects.reduce((s, r) => s + r.width, 0) / rects.length; return rects[0].width > avg * 1.6;
+        }, expected: ['min-width: 1100px']
+    },
+    { text: 'Niveau 11 : < 400px → items empilés (grid-auto-flow: row).', validate: () => getComputedStyle(grid).gridAutoFlow.includes('row'), expected: ['max-width: 400px'] },
+    {
+        text: 'Niveau 12 : ≥ 1000px → grid-auto-rows présent (rows > 0).', validate: () => {
+            const v = getComputedStyle(grid).gridAutoRows; return v && v !== 'auto';
+        }, expected: ['min-width: 1000px']
+    },
+    {
+        text: 'Niveau 13 : ≥ 1300px → réordonner (sidebar après).', validate: () => {
+            const s = sidebar(); if (!s) return false; return s.getBoundingClientRect().left > cards()[0].getBoundingClientRect().left;
+        }, expected: ['min-width: 1300px']
+    },
+    { text: 'Niveau 14 : 700–900px → align-content: start.', validate: () => getComputedStyle(grid).alignContent === 'start', expected: ['min-width: 700px', 'max-width: 900px'] },
+    {
+        text: 'Niveau 15 : ≥ 1500px → max-width du conteneur appliqué.', validate: () => {
+            const v = getComputedStyle(grid).maxWidth; return v && v !== 'none' && v !== '0px';
+        }, expected: ['min-width: 1500px']
+    },
+    { text: 'Niveau 16 : < 320px → cacher les images dans les cartes.', validate: () => cards().every(c => { const img = c.querySelector('img'); return !img || getComputedStyle(img).display === 'none'; }), expected: ['max-width: 320px'] },
+    { text: 'Niveau 17 : ≥ 1700px → gap augmenté et scale des items.', validate: () => getComputedStyle(grid).columnGap && parseFloat(getComputedStyle(grid).columnGap) >= 28, expected: ['min-width: 1700px'] },
+    {
+        text: 'Niveau 18 : 900–1100px → columns minmax(200px,1fr).', validate: () => {
+            // check presence of minmax in source via expected string; for visual check ensure columns count >=1
+            return getComputedStyle(grid).gridTemplateColumns.split(' ').length >= 1;
+        }, expected: ['min-width: 900px', 'max-width: 1100px', 'minmax']
+    },
+    { text: 'Niveau 19 : ≥ 2000px → 6 colonnes.', validate: () => getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length >= 6, expected: ['min-width: 2000px'] },
+    { text: 'Niveau 20 : ≥ 1600px → grid-template-areas réarrangée.', validate: () => getComputedStyle(grid).gridTemplateAreas && getComputedStyle(grid).gridTemplateAreas !== 'none', expected: ['min-width: 1600px'] },
+    { text: 'Niveau 21 : 480–600px → n afficher que 3 éléments visibles.', validate: () => cards().filter(c => c.offsetParent !== null).length <= 3, expected: ['min-width: 480px', 'max-width: 600px'] },
+    { text: 'Niveau 22 : ≥ 800px → grid-auto-flow: column.', validate: () => getComputedStyle(grid).gridAutoFlow.includes('column'), expected: ['min-width: 800px'] },
+    { text: 'Niveau 23 : ≥ 1250px → gap = 32px.', validate: () => getComputedStyle(grid).columnGap.includes('32px'), expected: ['min-width: 1250px'] },
+    { text: 'Niveau 24 : < 360px → réduire la taille de police des cartes.', validate: () => parseFloat(getComputedStyle(cards()[0]).fontSize) <= 13, expected: ['max-width: 360px'] },
+    {
+        text: 'Niveau 25 : ≥ 1800px → certains items plus hauts (masonry-like).', validate: () => {
+            const rects = cards().map(c => c.getBoundingClientRect()); const avgH = rects.reduce((s, r) => s + r.height, 0) / rects.length; return rects.some(r => r.height > avgH * 1.5);
+        }, expected: ['min-width: 1800px']
+    },
+    { text: 'Niveau 26 : 1000–1300px → colonnes 2fr 1fr.', validate: () => getComputedStyle(grid).gridTemplateColumns.split(' ')[0].includes('2fr') || getComputedStyle(grid).gridTemplateColumns.split(' ')[0].includes('2fr'), expected: ['min-width: 1000px', 'max-width: 1300px'] },
+    { text: 'Niveau 27 : ≥ 2100px → 7 colonnes.', validate: () => getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length >= 7, expected: ['min-width: 2100px'] },
+    { text: 'Niveau 28 : < 240px → cacher la sidebar.', validate: () => getComputedStyle(sidebar()).display === 'none', expected: ['max-width: 240px'] },
+    {
+        text: 'Niveau 29 : ≥ 1550px → premiers items occupent 2 lignes (grid-row span).', validate: () => {
+            const rects = cards().map(c => c.getBoundingClientRect()); const avgH = rects.reduce((s, r) => s + r.height, 0) / rects.length; return rects[0].height > avgH * 1.8 || rects[1].height > avgH * 1.8;
+        }, expected: ['min-width: 1550px']
+    },
+    { text: 'Niveau 30 : ≥ 1700px → 5 colonnes (repeat(5,1fr)).', validate: () => getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length === 5, expected: ['min-width: 1700px'] }
+];
+
+// helper expected substrings
+function checkExpectedForLevel(i) {
+    const lvl = levels[i];
+    const code = (codeInput && codeInput.value) ? codeInput.value.toLowerCase() : '';
+    if (!lvl.expected || !lvl.expected.length) return { ok: true, missing: [] };
+    const missing = lvl.expected.filter(s => !code.includes(s.toLowerCase()));
+    return { ok: missing.length === 0, missing };
+}
+
+// DOM & init
+let currentLevel = 0;
+let score = 0;
+const levelText = document.getElementById('level-text');
+const codeInput = document.getElementById('code-input');
+const statusDiv = document.getElementById('status');
+const nextBtn = document.getElementById('next-level');
+const levelCounter = document.getElementById('level-counter');
+const levelList = document.getElementById('level-list');
+const scoreDisplay = document.getElementById('score-display');
+
+function showToast(message, type = 'info', duration = 2500) {
+    const t = document.createElement('div'); t.className = `toast toast--${type}`; t.textContent = message; document.body.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 220); }, duration);
+}
+
+function updateLevelCounter() { if (!levelCounter) return; levelCounter.textContent = `Niveau ${currentLevel + 1} / ${levels.length}`; updateLevelList(); }
+function updateScore() { if (scoreDisplay) scoreDisplay.textContent = `Points: ${score}`; }
+
+function getDone() { try { return JSON.parse(localStorage.getItem('grid_done')) || []; } catch { return []; } }
+function setDone(arr) { localStorage.setItem('grid_done', JSON.stringify(arr)); }
+
+function updateLevelList() {
+    if (!levelList) return;
+    const done = getDone();
+    levelList.innerHTML = '';
+    levels.forEach((l, i) => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'level-btn'; b.textContent = `Niveau ${i + 1}`;
+        if (done.includes(i)) b.classList.add('done'); if (i === currentLevel) b.classList.add('selected');
+        b.onclick = () => { currentLevel = i; levelText.textContent = levels[currentLevel].text; codeInput.value = ''; statusDiv.innerHTML = ''; nextBtn.style.display = 'none'; updateLevelCounter(); localStorage.setItem('grid_progress', JSON.stringify({ currentLevel, score })); };
+        levelList.appendChild(b);
+    });
+}
+
+// restore
+const prog = JSON.parse(localStorage.getItem('grid_progress') || 'null'); if (prog) { currentLevel = prog.currentLevel || 0; score = prog.score || 0; }
+levelText.textContent = levels[currentLevel].text; updateLevelCounter(); updateScore();
+
+// Test handler
+document.getElementById('test-btn').onclick = () => {
+    let css = document.getElementById('mq-user-style-grid'); if (!css) { css = document.createElement('style'); css.id = 'mq-user-style-grid'; document.head.appendChild(css); }
+    css.textContent = codeInput.value;
+    // force reflow
+    void grid.offsetWidth;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        const effectOk = levels[currentLevel].validate();
+        const expectedCheck = checkExpectedForLevel(currentLevel);
+        if (effectOk && expectedCheck.ok) {
+            const done = getDone(); const already = done.includes(currentLevel);
+            if (!already) { score++; done.push(currentLevel); setDone(done); localStorage.setItem('grid_progress', JSON.stringify({ currentLevel, score })); }
+            statusDiv.textContent = already ? 'Déjà réussi' : 'Réussi'; statusDiv.style.color = 'green'; nextBtn.style.display = 'block'; updateLevelList(); updateScore();
+        } else if (effectOk && !expectedCheck.ok) {
+            showToast('Effet OK mais media query manquante: ' + expectedCheck.missing.join(', '), 'error', 4500);
+            statusDiv.textContent = 'Incorrect — media query manquante'; statusDiv.style.color = 'orange';
+        } else {
+            statusDiv.textContent = 'Incorrect'; statusDiv.style.color = 'red';
+        }
+    }));
+};
+
+nextBtn.onclick = () => {
+    currentLevel++; localStorage.setItem('grid_progress', JSON.stringify({ currentLevel, score }));
+    if (currentLevel >= levels.length) { document.getElementById('final-score').textContent = `Score : ${score} / ${levels.length}`; document.getElementById('game-end').style.display = 'block'; codeInput.style.display = 'none'; nextBtn.style.display = 'none'; levelText.textContent = 'Jeu terminé'; return; }
+    levelText.textContent = levels[currentLevel].text; codeInput.value = ''; statusDiv.innerHTML = ''; nextBtn.style.display = 'none'; updateLevelCounter();
+};
+
+document.getElementById('reload-css-btn').onclick = () => {
+    try {
+        const text = codeInput.value; let css = document.getElementById('mq-user-style-grid'); if (!css) { css = document.createElement('style'); css.id = 'mq-user-style-grid'; document.head.appendChild(css); }
+        css.textContent = text; void grid.offsetWidth; requestAnimationFrame(() => requestAnimationFrame(() => showToast('CSS appliqué', 'success', 1500)));
+    } catch (e) { showToast('Erreur', 'error', 2000); console.error(e); }
+};
+
+document.getElementById('restart-btn').onclick = () => { localStorage.removeItem('grid_progress'); localStorage.removeItem('grid_done'); location.reload(); };

@@ -1,5 +1,6 @@
 # Ne pas pousser le fichier de correction
 correction.css
+grid-correction.css
 
 # Fichiers système macOS
 .DS_Store

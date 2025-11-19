@@ -254,7 +254,6 @@ function loadProgress() {
 
 let currentLevel = 0;
 let score = 0;
-let startTime = Date.now();
 
 // restauration au chargement
 const progress = loadProgress();
@@ -262,7 +261,6 @@ if (progress) {
     currentLevel = progress.currentLevel;
     score = progress.score;
 }
-updateScoreDisplay();
 
 const levelText = document.getElementById("level-text");
 const codeInput = document.getElementById("code-input");
@@ -271,6 +269,7 @@ const nextBtn = document.getElementById("next-level");
 const gameEnd = document.getElementById("game-end");
 const levelCounter = document.getElementById('level-counter');
 const levelList = document.getElementById('level-list');
+
 const scoreDisplay = document.getElementById('score-display');
 
 levelText.textContent = levels[currentLevel].text;
@@ -286,6 +285,9 @@ function updateScoreDisplay() {
     if (!scoreDisplay) return;
     scoreDisplay.textContent = `Points: ${score}`;
 }
+
+// mettre à jour l'affichage du score après initialisation des éléments DOM
+updateScoreDisplay();
 
 // Liste des niveaux réussis (sauvegardée avec la progression)
 function getDoneLevels() {
@@ -400,15 +402,11 @@ nextBtn.onclick = () => {
 // FIN DE PARTIE
 // ---------------------
 function endGame() {
-    const totalTime = Math.round((Date.now() - startTime) / 1000);
-
     document.getElementById("final-score").textContent =
         `Score : ${score} / ${levels.length}`;
 
-    document.getElementById("final-time").textContent =
-        `Temps total : ${totalTime} sec`;
-
-    saveScore(score, totalTime);
+    // save score without time
+    saveScore(score);
     updateScoreboard();
 
     // reset progression sauvegardée
@@ -424,10 +422,11 @@ function endGame() {
 // ---------------------
 // SCOREBOARD LOCAL
 // ---------------------
-function saveScore(score, time) {
+
+function saveScore(score) {
     const name = prompt("Ton nom pour le classement ?") || "Anonyme";
 
-    const entry = { name, score, time };
+    const entry = { name, score };
 
     let list = [];
 
@@ -445,7 +444,7 @@ function saveScore(score, time) {
 function updateScoreboard() {
     let list = JSON.parse(localStorage.getItem("mq_scores") || "[]");
 
-    list.sort((a, b) => b.score - a.score || a.time - b.time);
+    list.sort((a, b) => b.score - a.score);
 
     const tbody = document.getElementById("scoreboard-body");
 
@@ -456,7 +455,6 @@ function updateScoreboard() {
             <tr>
                 <td>${row.name}</td>
                 <td>${row.score}</td>
-                <td>${row.time}s</td>
             </tr>
         `;
     });

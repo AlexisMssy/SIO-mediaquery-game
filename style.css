@@ -13,13 +13,44 @@ header {
     font-weight: bold;
 }
 
+/* Navigation principale */
+.main-nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 0;
+    background: linear-gradient(90deg, rgba(74, 74, 212, 0.06), rgba(74, 74, 212, 0.02));
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.main-nav a {
+    display: inline-block;
+    padding: 8px 14px;
+    text-decoration: none;
+    color: #4a4ad4;
+    font-weight: 700;
+    border-radius: 8px;
+    transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+}
+
+.main-nav a:hover {
+    background: #4a4ad4;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.main-nav a[aria-current="page"] {
+    background: #4a4ad4;
+    color: #fff;
+}
+
 #game {
     max-width: 900px;
     margin: 20px auto;
     padding: 20px;
     background: white;
     border-radius: 10px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 }
 
 .level-desc {
@@ -48,6 +79,7 @@ header {
     gap: 8px;
     margin-bottom: 16px;
 }
+
 .level-list .level-btn {
     padding: 6px 14px;
     border-radius: 6px;
@@ -58,21 +90,24 @@ header {
     cursor: pointer;
     transition: background 0.18s, color 0.18s;
 }
+
 .level-list .level-btn.done {
-    background: #4CAF50;
+    background: #337635;
     color: #fff;
     border-color: #388e3c;
 }
+
 .level-list .level-btn.selected {
     background: #4a4ad4;
     color: #fff;
     border-color: #2222aa;
 }
+
 /* (editor overlay removed) */
 
 
 textarea {
-    width: 100%;
+    width: 95%;
     height: 150px;
     font-family: Consolas, monospace;
     padding: 10px;
@@ -118,20 +153,30 @@ textarea {
     padding: 10px 14px;
     color: #fff;
     border-radius: 8px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
     font-weight: 600;
     z-index: 9999;
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 180ms ease, transform 180ms ease;
 }
+
 .toast.show {
     opacity: 1;
     transform: translateY(0);
 }
-.toast--success { background: #4CAF50; }
-.toast--error { background: #e74c3c; }
-.toast--info { background: #4a4ad4; }
+
+.toast--success {
+    background: #4CAF50;
+}
+
+.toast--error {
+    background: #e74c3c;
+}
+
+.toast--info {
+    background: #4a4ad4;
+}
 
 #preview {
     border: 2px dashed #999;
@@ -180,7 +225,7 @@ textarea {
     padding: 20px;
     background: white;
     border-radius: 10px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
     display: none;
 }
 
@@ -189,8 +234,61 @@ textarea {
     border-collapse: collapse;
 }
 
-#scoreboard th, #scoreboard td {
+#scoreboard th,
+#scoreboard td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
     text-align: center;
+}
+
+/* base grid */
+#grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    align-items: start;
+    max-width: 100%;
+}
+
+#grid .sidebar {
+    background: #eee;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+#grid .card {
+    background: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+#grid .card img {
+    display: block;
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    background: #ddd;
+}
+
+
+/* Footer */
+.site-footer {
+    margin-top: 40px;
+    padding: 18px 10px;
+    background: #fbfbfd;
+    color: #666;
+    text-align: center;
+    font-size: 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.site-footer a {
+    color: #4a4ad4;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.site-footer a:hover {
+    text-decoration: underline;
 }

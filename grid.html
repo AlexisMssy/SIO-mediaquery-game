@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIO MediaQuery Game</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <title>Jeu Grille — MediaQuery</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <!-- correction file intentionally NOT linked here -->
 </head>
 
 <body>
-    <header>SIO MediaQuery Game</header>
+    <header>Jeu Grille — MediaQuery</header>
     <nav class="main-nav">
         <a href="index.html">Jeu Carré</a>
         <a href="grid.html">Jeu Grille</a>
@@ -27,7 +28,16 @@
         <button id="test-btn">Tester</button>
 
         <div id="preview">
-            <div id="box"></div>
+            <div id="grid" class="grid-layout">
+                <div class="card"><img src="https://picsum.photos/200/250?random=1" alt="Item 1"/><div class="card-body">Item 1</div></div>
+                <div class="card"><img src="https://picsum.photos/200/250?random=2" alt="Item 2"/><div class="card-body">Item 2</div></div>
+                <div class="card"><img src="https://picsum.photos/200/250?random=3" alt="Item 3"/><div class="card-body">Item 3</div></div>
+                <div class="card"><img src="https://picsum.photos/200/250?random=4" alt="Item 4"/><div class="card-body">Item 4</div></div>
+                <div class="card"><img src="https://picsum.photos/200/250?random=5" alt="Item 5"/><div class="card-body">Item 5</div></div>
+                <div class="card"><img src="https://picsum.photos/200/250?random=6" alt="Item 6"/><div class="card-body">Item 6</div></div>
+                <div class="card"><img src="https://picsum.photos/200/250?random=7" alt="Item 7"/><div class="card-body">Item 7</div></div>
+                <div class="card"><img src="https://picsum.photos/200/250?random=8" alt="Item 8"/><div class="card-body">Item 8</div></div>
+            </div>
         </div>
 
         <div id="status"></div>
@@ -40,23 +50,10 @@
         </div>
     </div>
 
-    <div id="scoreboard">
-        <h2>Classement local</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
-            <tbody id="scoreboard-body"></tbody>
-        </table>
-    </div>
-
-    <script src="script.js"></script>
+    <script src="grid-script.js"></script>
 
     <footer class="site-footer">
-        © 2025 — SIO MediaQuery Game
+        © 2025 — Jeu Grille — SIO MediaQuery Game
     </footer>
 
     <script>
