@@ -35,6 +35,13 @@ header {
     margin-bottom: 12px;
 }
 
+.score-display {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
 .level-list {
     display: flex;
     flex-wrap: wrap;

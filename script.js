@@ -162,11 +162,32 @@ const levels = [
         validate: () => {
             const t = getComputedStyle(box).transform;
             if (!t || t === "none") return false;
-            const match = t.match(/^matrix\(([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+)\)$/);
-            if (!match) return false;
-            const a = parseFloat(match[1]);
-            const d = parseFloat(match[4]);
-            return Math.abs(a - 1.5) < 0.02 && Math.abs(d - 1.5) < 0.02;
+            // handle 2D matrix(a, b, c, d, tx, ty)
+            const m2 = t.match(/^matrix\(([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+)\)$/);
+            if (m2) {
+                const a = parseFloat(m2[1]);
+                const b = parseFloat(m2[2]);
+                const c = parseFloat(m2[3]);
+                const d = parseFloat(m2[4]);
+                const scaleX = Math.hypot(a, b);
+                const scaleY = Math.hypot(c, d);
+                return Math.abs(scaleX - 1.5) < 0.03 && Math.abs(scaleY - 1.5) < 0.03;
+            }
+            // handle 3D matrix3d(...) where scaleX ~ matrix3d[0], scaleY ~ matrix3d[5]
+            const m3 = t.match(/^matrix3d\(([^)]+)\)$/);
+            if (m3) {
+                const parts = m3[1].split(',').map(s => parseFloat(s.trim()));
+                if (parts.length >= 16) {
+                    const a = parts[0];
+                    const b = parts[1];
+                    const c = parts[4];
+                    const d = parts[5];
+                    const scaleX = Math.hypot(a, b);
+                    const scaleY = Math.hypot(c, d);
+                    return Math.abs(scaleX - 1.5) < 0.03 && Math.abs(scaleY - 1.5) < 0.03;
+                }
+            }
+            return false;
         },
         expected: ["min-width: 1701px"]
     },
@@ -241,6 +262,7 @@ if (progress) {
     currentLevel = progress.currentLevel;
     score = progress.score;
 }
+updateScoreDisplay();
 
 const levelText = document.getElementById("level-text");
 const codeInput = document.getElementById("code-input");
@@ -249,6 +271,7 @@ const nextBtn = document.getElementById("next-level");
 const gameEnd = document.getElementById("game-end");
 const levelCounter = document.getElementById('level-counter');
 const levelList = document.getElementById('level-list');
+const scoreDisplay = document.getElementById('score-display');
 
 levelText.textContent = levels[currentLevel].text;
 // afficher le compteur initial
@@ -257,6 +280,11 @@ function updateLevelCounter() {
     levelCounter.textContent = `Niveau ${currentLevel + 1} / ${levels.length}`;
     levelCounter.style.display = '';
     updateLevelList();
+}
+
+function updateScoreDisplay() {
+    if (!scoreDisplay) return;
+    scoreDisplay.textContent = `Points: ${score}`;
 }
 
 // Liste des niveaux réussis (sauvegardée avec la progression)
@@ -321,17 +349,21 @@ document.getElementById("test-btn").onclick = () => {
             const expectedCheck = checkExpectedForLevel(currentLevel);
 
             if (effectOk && expectedCheck.ok) {
-                score++;
-                // marquer le niveau comme fait
+                // marquer le niveau comme fait et n'ajouter au score qu'une seule fois
                 const doneLevels = getDoneLevels();
-                if (!doneLevels.includes(currentLevel)) {
+                const alreadyDone = doneLevels.includes(currentLevel);
+                if (!alreadyDone) {
+                    score++;
                     doneLevels.push(currentLevel);
                     setDoneLevels(doneLevels);
+                    saveProgress();
                 }
-                statusDiv.textContent = "Réussi";
+
+                statusDiv.textContent = alreadyDone ? "Déjà réussi" : "Réussi";
                 statusDiv.style.color = "green";
                 nextBtn.style.display = "block";
                 updateLevelList();
+                updateScoreDisplay();
             } else if (effectOk && !expectedCheck.ok) {
                 // effet présent mais media query manquante
                 const missingText = expectedCheck.missing.join(', ');
