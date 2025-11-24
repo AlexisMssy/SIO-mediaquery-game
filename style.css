@@ -292,3 +292,24 @@ textarea {
 .site-footer a:hover {
     text-decoration: underline;
 }
+
+/* Styles pour la page Bootstrap */
+.bootstrap-preview {
+    min-height: 200px;
+    padding: 30px;
+}
+
+.target-container {
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#bootstrap-target {
+    width: 100%;
+}
+
+#bootstrap-target > div {
+    margin: 5px;
+}

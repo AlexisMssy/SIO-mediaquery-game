@@ -4,17 +4,17 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeu Grille — MediaQuery</title>
+    <title>SIO CSS Game</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <!-- correction file intentionally NOT linked here -->
 </head>
 
 <body>
-    <header>Jeu Grille — MediaQuery</header>
+    <header>SIO CSS Game</header>
     <nav class="main-nav">
-        <a href="index.html">Jeu Carré</a>
-        <a href="grid.html">Jeu Grille</a>
+        <a href="index.html">Jeu Carré MediaQuery</a>
+        <a href="grid.html">Jeu Grille MediaQuery</a>
+        <a href="bootstrap.html">Jeu Bootstrap</a>
     </nav>
 
     <div id="game">
@@ -50,24 +50,16 @@
         </div>
     </div>
 
+    <script src="utils.js"></script>
     <script src="grid-script.js"></script>
+    <script>
+        // Marque le lien de navigation actif
+        markActiveNavLink();
+    </script>
 
     <footer class="site-footer">
-        © 2025 — Jeu Grille — SIO MediaQuery Game
+        © 2025 — SIO CSS Game
     </footer>
-
-    <script>
-    // mark current nav link with aria-current="page"
-    (function(){
-        const navLinks = document.querySelectorAll('.main-nav a');
-        const p = location.pathname.split('/').pop() || 'index.html';
-        navLinks.forEach(a => {
-            const href = a.getAttribute('href');
-            const target = href.split('/').pop();
-            if (target === p) a.setAttribute('aria-current','page');
-        });
-    })();
-    </script>
 
 </body>
 

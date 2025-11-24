@@ -248,7 +248,9 @@ function loadProgress() {
         if (data && typeof data.currentLevel === 'number' && typeof data.score === 'number') {
             return data;
         }
-    } catch {}
+    } catch (e) {
+        console.error('Erreur lors du chargement de la progression:', e);
+    }
     return null;
 }
 
@@ -291,14 +293,20 @@ updateScoreDisplay();
 
 // Liste des niveaux réussis (sauvegardée avec la progression)
 function getDoneLevels() {
-    let done = [];
     try {
-        done = JSON.parse(localStorage.getItem('mq_done_levels')) || [];
-    } catch {}
-    return done;
+        return JSON.parse(localStorage.getItem('mq_done_levels')) || [];
+    } catch (e) {
+        console.error('Erreur lors du chargement des niveaux réussis:', e);
+        return [];
+    }
 }
+
 function setDoneLevels(done) {
-    localStorage.setItem('mq_done_levels', JSON.stringify(done));
+    try {
+        localStorage.setItem('mq_done_levels', JSON.stringify(done));
+    } catch (e) {
+        console.error('Erreur lors de la sauvegarde des niveaux réussis:', e);
+    }
 }
 
 function updateLevelList() {
@@ -330,92 +338,104 @@ updateLevelCounter();
 // ---------------------
 // TEST DU NIVEAU
 // ---------------------
-document.getElementById("test-btn").onclick = () => {
-    // reuse a single <style> element so we don't keep appending many tags
-    let css = document.getElementById('mq-user-style');
-    if (!css) {
-        css = document.createElement('style');
-        css.id = 'mq-user-style';
-        document.head.appendChild(css);
-    }
-    css.textContent = codeInput.value;
+const testBtn = document.getElementById("test-btn");
+if (testBtn) {
+    testBtn.onclick = () => {
+        if (!codeInput || !box || !statusDiv || !nextBtn) {
+            console.error('Éléments DOM manquants pour le test');
+            return;
+        }
 
-    // force reflow so computed styles are up-to-date
-    void box.offsetWidth;
+        try {
+            const css = getOrCreateStyleElement('mq-user-style');
+            css.textContent = codeInput.value;
 
-    // wait two frames to ensure styles applied before validating
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-
-            const effectOk = levels[currentLevel].validate();
-            const expectedCheck = checkExpectedForLevel(currentLevel);
-
-            if (effectOk && expectedCheck.ok) {
-                // marquer le niveau comme fait et n'ajouter au score qu'une seule fois
-                const doneLevels = getDoneLevels();
-                const alreadyDone = doneLevels.includes(currentLevel);
-                if (!alreadyDone) {
-                    score++;
-                    doneLevels.push(currentLevel);
-                    setDoneLevels(doneLevels);
-                    saveProgress();
+            waitForReflow(box, () => {
+                if (currentLevel >= levels.length || !levels[currentLevel]) {
+                    console.error('Niveau invalide:', currentLevel);
+                    return;
                 }
 
-                statusDiv.textContent = alreadyDone ? "Déjà réussi" : "Réussi";
-                statusDiv.style.color = "green";
-                nextBtn.style.display = "block";
-                updateLevelList();
-                updateScoreDisplay();
-            } else if (effectOk && !expectedCheck.ok) {
-                // effet présent mais media query manquante
-                const missingText = expectedCheck.missing.join(', ');
-                showToast(`Effet OK mais il manque la media query attendue: ${missingText}`, 'error', 5000);
-                statusDiv.textContent = `Incorrect — media query manquante: ${missingText}`;
-                statusDiv.style.color = 'orange';
-            } else {
-                statusDiv.textContent = "Incorrect";
-                statusDiv.style.color = "red";
-            }
+                const effectOk = levels[currentLevel].validate();
+                const expectedCheck = checkExpectedForLevel(currentLevel);
 
-        });
-    });
-};
+                if (effectOk && expectedCheck.ok) {
+                    // marquer le niveau comme fait et n'ajouter au score qu'une seule fois
+                    const doneLevels = getDoneLevels();
+                    const alreadyDone = doneLevels.includes(currentLevel);
+                    if (!alreadyDone) {
+                        score++;
+                        doneLevels.push(currentLevel);
+                        setDoneLevels(doneLevels);
+                        saveProgress();
+                    }
+
+                    statusDiv.textContent = alreadyDone ? "Déjà réussi" : "Réussi";
+                    statusDiv.style.color = "green";
+                    nextBtn.style.display = "block";
+                    updateLevelList();
+                    updateScoreDisplay();
+                } else if (effectOk && !expectedCheck.ok) {
+                    // effet présent mais media query manquante
+                    const missingText = expectedCheck.missing.join(', ');
+                    showToast(`Effet OK mais il manque la media query attendue: ${missingText}`, 'error', 5000);
+                    statusDiv.textContent = `Incorrect — media query manquante: ${missingText}`;
+                    statusDiv.style.color = 'orange';
+                } else {
+                    statusDiv.textContent = "Incorrect";
+                    statusDiv.style.color = "red";
+                }
+            });
+        } catch (err) {
+            console.error('Erreur lors du test:', err);
+            showToast('Erreur lors du test', 'error');
+        }
+    };
+}
 
 // ---------------------
 // PASSER AU NIVEAU SUIVANT
 // ---------------------
-nextBtn.onclick = () => {
-    currentLevel++;
-    saveProgress();
-    if (currentLevel >= levels.length) {
-        endGame();
-        return;
-    }
-    levelText.textContent = levels[currentLevel].text;
-    codeInput.value = "";
-    statusDiv.innerHTML = "";
-    nextBtn.style.display = "none";
-    updateLevelCounter();
-};
+if (nextBtn) {
+    nextBtn.onclick = () => {
+        currentLevel++;
+        saveProgress();
+        if (currentLevel >= levels.length) {
+            endGame();
+            return;
+        }
+        if (levelText) levelText.textContent = levels[currentLevel].text;
+        if (codeInput) codeInput.value = "";
+        if (statusDiv) statusDiv.innerHTML = "";
+        nextBtn.style.display = "none";
+        updateLevelCounter();
+    };
+}
 
 // ---------------------
 // FIN DE PARTIE
 // ---------------------
 function endGame() {
-    document.getElementById("final-score").textContent =
-        `Score : ${score} / ${levels.length}`;
+    const finalScoreEl = document.getElementById("final-score");
+    if (finalScoreEl) {
+        finalScoreEl.textContent = `Score : ${score} / ${levels.length}`;
+    }
 
     // save score without time
     saveScore(score);
     updateScoreboard();
 
     // reset progression sauvegardée
-    localStorage.removeItem('mq_progress');
+    try {
+        localStorage.removeItem('mq_progress');
+    } catch (e) {
+        console.error('Erreur lors de la suppression de la progression:', e);
+    }
 
-    gameEnd.style.display = "block";
-    codeInput.style.display = "none";
-    nextBtn.style.display = "none";
-    levelText.textContent = "Jeu terminé";
+    if (gameEnd) gameEnd.style.display = "block";
+    if (codeInput) codeInput.style.display = "none";
+    if (nextBtn) nextBtn.style.display = "none";
+    if (levelText) levelText.textContent = "Jeu terminé";
     if (levelCounter) levelCounter.style.display = 'none';
 }
 
@@ -432,32 +452,53 @@ function saveScore(score) {
 
     try {
         list = JSON.parse(localStorage.getItem("mq_scores")) || [];
-    } catch {
+    } catch (e) {
+        console.error('Erreur lors de la lecture du scoreboard:', e);
         list = []; // si JSON cassé
     }
 
-    list.push(entry);
-    localStorage.setItem("mq_scores", JSON.stringify(list));
+    try {
+        list.push(entry);
+        localStorage.setItem("mq_scores", JSON.stringify(list));
+    } catch (e) {
+        console.error('Erreur lors de la sauvegarde du score:', e);
+        showToast('Erreur lors de la sauvegarde du score', 'error');
+    }
 }
 
 // Mise à jour visuelle
 function updateScoreboard() {
-    let list = JSON.parse(localStorage.getItem("mq_scores") || "[]");
+    let list = [];
+    try {
+        list = JSON.parse(localStorage.getItem("mq_scores") || "[]");
+    } catch (e) {
+        console.error("Erreur lors de la lecture du scoreboard:", e);
+        return;
+    }
 
     list.sort((a, b) => b.score - a.score);
 
     const tbody = document.getElementById("scoreboard-body");
+    if (!tbody) return;
 
-    tbody.innerHTML = "";
+    // Optimisation : construire le HTML en une seule fois au lieu d'utiliser +=
+    const rowsHtml = list.map(row => `
+        <tr>
+            <td>${escapeHtml(row.name)}</td>
+            <td>${row.score}</td>
+        </tr>
+    `).join('');
 
-    list.forEach(row => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${row.name}</td>
-                <td>${row.score}</td>
-            </tr>
-        `;
-    });
+    tbody.innerHTML = rowsHtml;
+}
+
+/**
+ * Échappe les caractères HTML pour éviter les injections XSS
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 updateScoreboard();
@@ -465,52 +506,39 @@ updateScoreboard();
 // ---------------------
 // REJOUER
 // ---------------------
-document.getElementById("restart-btn").onclick = () => {
-    localStorage.removeItem('mq_progress');
-    location.reload();
-};
+const restartBtn = document.getElementById("restart-btn");
+if (restartBtn) {
+    restartBtn.onclick = () => {
+        try {
+            localStorage.removeItem('mq_progress');
+            localStorage.removeItem('mq_done_levels');
+        } catch (e) {
+            console.error('Erreur lors de la réinitialisation:', e);
+        }
+        location.reload();
+    };
+}
 
 // ---------------------
 // RECHARGER CSS EXTERNE
 // ---------------------
-// simple toast notification helper
-function showToast(message, type = 'info', duration = 3000) {
-    const t = document.createElement('div');
-    t.className = `toast toast--${type}`;
-    t.textContent = message;
-    document.body.appendChild(t);
-
-    // force reflow then show
-    requestAnimationFrame(() => t.classList.add('show'));
-
-    setTimeout(() => {
-        t.classList.remove('show');
-        // remove after transition
-        setTimeout(() => t.remove(), 220);
-    }, duration);
-}
+// Les fonctions utilitaires sont maintenant dans utils.js
 
 const reloadCssBtn = document.getElementById('reload-css-btn');
 if (reloadCssBtn) {
     // maintenant, le bouton recharge le CSS contenu dans le textarea `code-input`
     reloadCssBtn.onclick = () => {
         try {
-            const text = codeInput.value;
-
-            let css = document.getElementById('mq-user-style');
-            if (!css) {
-                css = document.createElement('style');
-                css.id = 'mq-user-style';
-                document.head.appendChild(css);
+            if (!codeInput) {
+                showToast('Erreur : zone de code introuvable', 'error');
+                return;
             }
-            css.textContent = text;
+            const css = getOrCreateStyleElement('mq-user-style');
+            css.textContent = codeInput.value;
 
-            // force reflow et attendre deux frames (comme pour le test)
-            void box.offsetWidth;
-            requestAnimationFrame(() => requestAnimationFrame(() => {
+            waitForReflow(box, () => {
                 showToast('CSS appliqué depuis la zone de code', 'success');
-            }));
-
+            });
         } catch (err) {
             showToast('Erreur : impossible d\'appliquer le CSS', 'error');
             console.error(err);

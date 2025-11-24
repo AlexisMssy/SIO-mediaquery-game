@@ -1,6 +1,7 @@
 # Ne pas pousser le fichier de correction
 correction.css
 grid-correction.css
+bootstrap-correction.txt
 
 # Fichiers système macOS
 .DS_Store
